@@ -41,7 +41,8 @@ trait LaravelBlock
      */
     public function isBlocking($user)
     {
-        return Block::where('user_id', $this->id)
+        return Block::toBase()
+            ->where('user_id', $this->id)
             ->where('blocking_id', $user->id)
             ->first();
     }
@@ -54,7 +55,8 @@ trait LaravelBlock
      */
     public function isBlockedBy($user)
     {
-        return Block::where('user_id', $user->id)
+        return Block::toBase()
+            ->where('user_id', $user->id)
             ->where('blocking_id', $this->id)
             ->first();
     }
@@ -78,9 +80,10 @@ trait LaravelBlock
      */
     public function getBlockingIds()
     {
-        return Block::where('user_id', $this->id)
-            ->with('blocking')
-            ->pluck('blocking_id');
+        return Block::toBase()
+            ->where('user_id', $this->id)
+            ->pluck('blocking_id')
+            ->toArray();
     }
 
     /**
@@ -102,8 +105,17 @@ trait LaravelBlock
      */
     public function getBlockersIds()
     {
-        return Block::where('blocking_id', $this->id)
-            ->with('blockers')
-            ->pluck('user_id');
+        return Block::toBase()
+            ->where('blocking_id', $this->id)
+            ->pluck('user_id')
+            ->toArray();
+    }
+
+    public function getBlockingAndBlockersIds()
+    {
+        return [
+            'blocking' => $this->getBlockingIds(),
+            'blockers' => $this->getBlockersIds(),
+        ];
     }
 }
