@@ -2,6 +2,7 @@
 
 namespace TimGavin\LaravelBlock;
 
+use Carbon\Carbon;
 use TimGavin\LaravelBlock\Models\Block;
 
 trait LaravelBlock
@@ -117,5 +118,59 @@ trait LaravelBlock
             'blocking' => $this->getBlockingIds(),
             'blockers' => $this->getBlockersIds(),
         ];
+    }
+
+    /**
+     * Caches IDs of the users a user is blocking.
+     *
+     * @param mixed
+     * @return array
+     */
+    public function cacheBlocking($duration = null)
+    {
+        $duration ?? Carbon::now()->addDay();
+
+        cache()->forget('blocking.' . auth()->id());
+
+        cache()->remember('blocking.' . auth()->id(), $duration, function () {
+            return auth()->user()->getBlockingIds();
+        });
+    }
+
+    /**
+     * Returns IDs of the users a user is blocking.
+     *
+     * @return array
+     */
+    public function getBlockingCache()
+    {
+        return cache()->get('blocking.' . auth()->id()) ?? [];
+    }
+
+    /**
+     * Caches IDs of the users who are blocking a user.
+     *
+     * @param mixed
+     * @return array
+     */
+    public function cacheBlockers($duration = null)
+    {
+        $duration ?? Carbon::now()->addDay();
+
+        cache()->forget('blockers.' . auth()->id());
+
+        cache()->remember('blockers.' . auth()->id(), $duration, function () {
+            return auth()->user()->getBlockersIds();
+        });
+    }
+
+    /**
+     * Returns IDs of the users who are blocking a user.
+     *
+     * @return array
+     */
+    public function getBlockersCache()
+    {
+        return cache()->get('blockers.' . auth()->id()) ?? [];
     }
 }

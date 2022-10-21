@@ -40,48 +40,75 @@ php artisan migrate
 
 ## Usage
 
-Block a user
+Block a user.
 ```php
 auth()->user()->block($user);
 ```
 
-Unblock a user
+Unblock a user.
 ```php
 auth()->user()->unblock($user);
 ```
 
-Check if a user is blocking another user
+Check if a user is blocking another user.
 ```php
 @if (auth()->user()->isBlocking($user))
     You are blocking this user.
 @endif
 ```
 
-Check if a user is blocked by another user
+Check if a user is blocked by another user.
 ```php
 @if (auth()->user()->isBlockedBy($user))
     This user is blocking you.
 @endif
 ```
 
-Returns the users a user is blocking
+Returns the users a user is blocking.
 ```php
 auth()->user()->getBlocking();
 ```
 
-Returns an array of IDs of the users a user is blocking
+Returns an array of IDs of the users a user is blocking.
 ```php
 auth()->user()->getBlockingIds();
 ```
 
-Returns the users who are blocking a user
+Returns the users who are blocking a user.
 ```php
 auth()->user()->getBlockers();
 ```
 
-Returns an array of IDs of the users who are blocking a user
+Returns an array of IDs of the users who are blocking a user.
 ```php
 auth()->user()->getBlockersIds();
+```
+
+Caches the IDs of the users a user is blocking. Default is 1 day.
+```php
+// 1 day
+auth()->user()->cacheBlocking();
+
+// 1 hour
+auth()->user()->cacheBlocking(3600);
+
+// 1 month
+auth()->user()->cacheBlocking(Carbon::addMonth());
+```
+
+Returns an array of IDs of the users a user is blocking.
+```php
+auth()->user()->getBlockingCache();
+```
+
+Caches the IDs of the users who are blocking a user. Default is 1 day.
+```php
+auth()->user()->cacheBlockers();
+```
+
+Returns an array of IDs of the users who are blocking a user.
+```php
+auth()->user()->getBlockersCache();
 ```
 
 ## Change log

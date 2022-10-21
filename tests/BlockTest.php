@@ -131,4 +131,62 @@ class BlockTest extends TestCase
 
         $this->assertContains(2, $blockedByIds);
     }
+
+    /** @test */
+    public function it_caches_the_ids_of_users_a_user_is_blocking()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $this->actingAs($user1);
+
+        auth()->user()->block($user2);
+        auth()->user()->cacheBlocking();
+
+        $this->assertContains(2, cache('blocking.' . auth()->id()));
+    }
+
+    /** @test */
+    public function it_gets_the_cached_ids_of_users_a_user_is_blocking()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $this->actingAs($user1);
+
+        auth()->user()->block($user2);
+        auth()->user()->cacheBlocking();
+
+        $this->assertContains(2, auth()->user()->getBlockingCache());
+    }
+
+    /** @test */
+    public function it_caches_the_ids_of_users_who_are_blocking_a_user()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user2->block($user1);
+
+        $this->actingAs($user1);
+
+        auth()->user()->cacheBlockers();
+
+        $this->assertContains(2, cache('blockers.' . auth()->id()));
+    }
+
+    /** @test */
+    public function it_gets_the_cached_ids_of_users_who_are_blocking_a_user()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user2->block($user1);
+
+        $this->actingAs($user1);
+
+        auth()->user()->cacheBlockers();
+
+        $this->assertContains(2, auth()->user()->getBlockersCache());
+    }
 }

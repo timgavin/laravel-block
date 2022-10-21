@@ -2,10 +2,10 @@
 
 namespace TimGavin\LaravelBlock\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use TimGavin\LaravelBlock\LaravelBlock;
 
-class User extends Model
+class User extends Authenticatable
 {
     use LaravelBlock;
 
