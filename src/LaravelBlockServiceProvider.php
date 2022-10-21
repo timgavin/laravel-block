@@ -13,7 +13,7 @@ class LaravelBlockServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
         if ($this->app->runningInConsole()) {
             $this->bootForConsole();
@@ -27,7 +27,7 @@ class LaravelBlockServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/laravel-block.php', 'laravel-block');
+        $this->mergeConfigFrom(__DIR__ . '/../config/laravel-block.php', 'laravel-block');
 
         // Register the service the package provides.
         $this->app->singleton('laravel-block', function ($app) {
