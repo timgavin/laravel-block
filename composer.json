@@ -15,9 +15,6 @@
         "LaravelBlock",
         "Block users"
     ],
-    "require": {
-        "illuminate/support": "10.0"
-    },
     "require-dev": {
         "phpunit/phpunit": "~9.0",
         "orchestra/testbench": "~7"
