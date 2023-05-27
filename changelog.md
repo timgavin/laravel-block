@@ -9,7 +9,6 @@ All notable changes to `Laravel Block` will be documented in this file.
 ## Version 1.1.3
 
 - Removed illuminate/support
--
 
 ## Version 1.1.2
 
