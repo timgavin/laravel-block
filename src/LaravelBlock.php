@@ -10,7 +10,7 @@ trait LaravelBlock
     /**
      * Block the given user.
      *
-     * @param \App\Models\User $user
+     * @param  \App\Models\User  $user
      * @return void
      */
     public function block($user): void
@@ -24,7 +24,7 @@ trait LaravelBlock
     /**
      * Unblock the given user.
      *
-     * @param \App\Models\User $user
+     * @param  \App\Models\User  $user
      * @return void
      */
     public function unblock($user): void
@@ -37,8 +37,8 @@ trait LaravelBlock
     /**
      * Check if a user is blocking the given user.
      *
-     * @param \App\Models\User $user
-     * @return boolean
+     * @param  \App\Models\User  $user
+     * @return bool
      */
     public function isBlocking($user): bool
     {
@@ -57,8 +57,8 @@ trait LaravelBlock
     /**
      * Check if a user is blocked by the given user.
      *
-     * @param \App\Models\User $user
-     * @return boolean
+     * @param  \App\Models\User  $user
+     * @return bool
      */
     public function isBlockedBy($user): bool
     {
