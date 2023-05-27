@@ -10,10 +10,10 @@ trait LaravelBlock
     /**
      * Block the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
      * @return void
      */
-    public function block($user)
+    public function block($user): void
     {
         Block::firstOrCreate([
             'user_id' => $this->id,
@@ -24,10 +24,10 @@ trait LaravelBlock
     /**
      * Unblock the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param \App\Models\User $user
      * @return void
      */
-    public function unblock($user)
+    public function unblock($user): void
     {
         Block::where('user_id', $this->id)
             ->where('blocking_id', $user->id)
@@ -37,35 +37,47 @@ trait LaravelBlock
     /**
      * Check if a user is blocking the given user.
      *
-     * @param  \App\Models\User  $user
-     * @return void
+     * @param \App\Models\User $user
+     * @return boolean
      */
-    public function isBlocking($user)
+    public function isBlocking($user): bool
     {
-        return Block::toBase()
+        $isBlocking = Block::toBase()
             ->where('user_id', $this->id)
             ->where('blocking_id', $user->id)
             ->first();
+
+        if ($isBlocking) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Check if a user is blocked by the given user.
      *
-     * @param  \App\Models\User  $user
-     * @return void
+     * @param \App\Models\User $user
+     * @return boolean
      */
-    public function isBlockedBy($user)
+    public function isBlockedBy($user): bool
     {
-        return Block::toBase()
+        $isBlockedBy = Block::toBase()
             ->where('user_id', $user->id)
             ->where('blocking_id', $this->id)
             ->first();
+
+        if ($isBlockedBy) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
      * Returns the users a user is blocking.
      *
-     * @return array
+     * @return Illuminate\Database\Eloquent\Collection
      */
     public function getBlocking()
     {
@@ -79,7 +91,7 @@ trait LaravelBlock
      *
      * @return array
      */
-    public function getBlockingIds()
+    public function getBlockingIds(): array
     {
         return Block::toBase()
             ->where('user_id', $this->id)
@@ -90,7 +102,7 @@ trait LaravelBlock
     /**
      * Returns the users who are blocking a user.
      *
-     * @return array
+     * @return Illuminate\Database\Eloquent\Collection
      */
     public function getBlockers()
     {
@@ -104,7 +116,7 @@ trait LaravelBlock
      *
      * @return array
      */
-    public function getBlockersIds()
+    public function getBlockersIds(): array
     {
         return Block::toBase()
             ->where('blocking_id', $this->id)
@@ -112,7 +124,13 @@ trait LaravelBlock
             ->toArray();
     }
 
-    public function getBlockingAndBlockersIds()
+    /**
+     * Returns IDs of the users a user is blocking.
+     * Returns IDs of the users who are blocking a user.
+     *
+     * @return array
+     */
+    public function getBlockingAndBlockersIds(): array
     {
         return [
             'blocking' => $this->getBlockingIds(),
@@ -124,7 +142,7 @@ trait LaravelBlock
      * Caches IDs of the users a user is blocking.
      *
      * @param mixed
-     * @return array
+     * @return Illuminate\Database\Eloquent\Collection
      */
     public function cacheBlocking($duration = null)
     {
@@ -142,7 +160,7 @@ trait LaravelBlock
      *
      * @return array
      */
-    public function getBlockingCache()
+    public function getBlockingCache(): array
     {
         return cache()->get('blocking.' . auth()->id()) ?? [];
     }
@@ -151,9 +169,9 @@ trait LaravelBlock
      * Caches IDs of the users who are blocking a user.
      *
      * @param mixed
-     * @return array
+     * @return void
      */
-    public function cacheBlockers($duration = null)
+    public function cacheBlockers($duration = null): void
     {
         $duration ?? Carbon::now()->addDay();
 
@@ -169,7 +187,7 @@ trait LaravelBlock
      *
      * @return array
      */
-    public function getBlockersCache()
+    public function getBlockersCache(): array
     {
         return cache()->get('blockers.' . auth()->id()) ?? [];
     }
