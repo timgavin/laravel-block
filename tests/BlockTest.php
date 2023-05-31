@@ -49,7 +49,7 @@ class BlockTest extends TestCase
         if ($user1->isBlocking($user2)) {
             $this->assertTrue(true);
         } else {
-            $this->assertTrue(false);
+            $this->fail();
         }
     }
 
@@ -64,7 +64,7 @@ class BlockTest extends TestCase
         if ($user2->isBlockedBy($user1)) {
             $this->assertTrue(true);
         } else {
-            $this->assertTrue(false);
+            $this->fail();
         }
     }
 
@@ -82,7 +82,7 @@ class BlockTest extends TestCase
             if ($item->blocking->id === 2) {
                 $this->assertTrue(true);
             } else {
-                $this->assertTrue(false);
+                $this->fail();
             }
         }
     }
@@ -114,7 +114,7 @@ class BlockTest extends TestCase
             if ($item->blocking->id === 1) {
                 $this->assertTrue(true);
             } else {
-                $this->assertTrue(false);
+                $this->fail();
             }
         }
     }
@@ -188,5 +188,51 @@ class BlockTest extends TestCase
         auth()->user()->cacheBlockers();
 
         $this->assertContains(2, auth()->user()->getBlockersCache());
+    }
+
+    /** @test */
+    public function it_clears_the_cached_ids_of_users_who_are_blocked_by_a_user()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user2->block($user1);
+
+        $this->actingAs($user1);
+
+        auth()->user()->cacheBlocking();
+
+        auth()->user()->clearBlockingCache();
+
+        $cache = auth()->user()->getBlockingCache();
+
+        if (empty($cache)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
+    }
+
+    /** @test */
+    public function it_clears_the_cached_ids_of_users_who_are_blocking_a_user()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user2->block($user1);
+
+        $this->actingAs($user1);
+
+        auth()->user()->cacheBlockers();
+
+        auth()->user()->clearBlockersCache();
+
+        $cache = auth()->user()->getBlockersCache();
+
+        if (empty($cache)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
     }
 }

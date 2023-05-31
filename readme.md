@@ -69,19 +69,24 @@ Returns the users a user is blocking.
 auth()->user()->getBlocking();
 ```
 
-Returns an array of IDs of the users a user is blocking.
-```php
-auth()->user()->getBlockingIds();
-```
-
 Returns the users who are blocking a user.
 ```php
 auth()->user()->getBlockers();
 ```
 
+Returns an array of IDs of the users a user is blocking.
+```php
+auth()->user()->getBlockingIds();
+```
+
 Returns an array of IDs of the users who are blocking a user.
 ```php
 auth()->user()->getBlockersIds();
+```
+
+Returns an array of IDs of the users a user is blocking, and who is blocking a user
+```php
+auth()->user()->getBlockingAndBlockersIds()
 ```
 
 Caches the IDs of the users a user is blocking. Default is 1 day.
@@ -109,6 +114,16 @@ auth()->user()->cacheBlockers();
 Returns an array of IDs of the users who are blocking a user.
 ```php
 auth()->user()->getBlockersCache();
+```
+
+Clears the Blocking cache
+```php
+auth()->user()->clearBlockingCache();
+```
+
+Clears the Blockers cache
+```php
+auth()->user()->clearBlockersCache();
 ```
 
 ## Change log

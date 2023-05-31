@@ -27,12 +27,7 @@ class LaravelBlockServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/laravel-block.php', 'laravel-block');
-
-        // Register the service the package provides.
-        $this->app->singleton('laravel-block', function ($app) {
-            return new LaravelBlock;
-        });
+        //
     }
 
     /**

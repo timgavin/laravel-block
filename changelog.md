@@ -2,6 +2,13 @@
 
 All notable changes to `Laravel Block` will be documented in this file.
 
+## Version 1.1.5
+
+- Added cache clearing methods
+- Fixed some import/config issues
+- Added additional tests
+- Updated README
+
 ## Version 1.1.4
 
 - Updated PHP return types

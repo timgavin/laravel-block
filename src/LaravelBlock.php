@@ -2,6 +2,7 @@
 
 namespace TimGavin\LaravelBlock;
 
+use App\Models\User;
 use Carbon\Carbon;
 use TimGavin\LaravelBlock\Models\Block;
 
@@ -10,7 +11,7 @@ trait LaravelBlock
     /**
      * Block the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param  User  $user
      * @return void
      */
     public function block($user): void
@@ -24,7 +25,7 @@ trait LaravelBlock
     /**
      * Unblock the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param  User  $user
      * @return void
      */
     public function unblock($user): void
@@ -37,7 +38,7 @@ trait LaravelBlock
     /**
      * Check if a user is blocking the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param  User  $user
      * @return bool
      */
     public function isBlocking($user): bool
@@ -57,7 +58,7 @@ trait LaravelBlock
     /**
      * Check if a user is blocked by the given user.
      *
-     * @param  \App\Models\User  $user
+     * @param  User  $user
      * @return bool
      */
     public function isBlockedBy($user): bool
@@ -87,6 +88,18 @@ trait LaravelBlock
     }
 
     /**
+     * Returns the users who are blocking a user.
+     *
+     * @return Illuminate\Database\Eloquent\Collection
+     */
+    public function getBlockers()
+    {
+        return Block::where('blocking_id', $this->id)
+            ->with('blockers')
+            ->get();
+    }
+
+    /**
      * Returns IDs of the users a user is blocking.
      *
      * @return array
@@ -97,18 +110,6 @@ trait LaravelBlock
             ->where('user_id', $this->id)
             ->pluck('blocking_id')
             ->toArray();
-    }
-
-    /**
-     * Returns the users who are blocking a user.
-     *
-     * @return Illuminate\Database\Eloquent\Collection
-     */
-    public function getBlockers()
-    {
-        return Block::where('blocking_id', $this->id)
-            ->with('blockers')
-            ->get();
     }
 
     /**
@@ -141,10 +142,10 @@ trait LaravelBlock
     /**
      * Caches IDs of the users a user is blocking.
      *
-     * @param mixed
-     * @return Illuminate\Database\Eloquent\Collection
+     * @param mixed $duration
+     * @return void
      */
-    public function cacheBlocking($duration = null)
+    public function cacheBlocking(mixed $duration = null): void
     {
         $duration ?? Carbon::now()->addDay();
 
@@ -156,22 +157,12 @@ trait LaravelBlock
     }
 
     /**
-     * Returns IDs of the users a user is blocking.
-     *
-     * @return array
-     */
-    public function getBlockingCache(): array
-    {
-        return cache()->get('blocking.' . auth()->id()) ?? [];
-    }
-
-    /**
      * Caches IDs of the users who are blocking a user.
      *
-     * @param mixed
+     * @param mixed|null $duration
      * @return void
      */
-    public function cacheBlockers($duration = null): void
+    public function cacheBlockers(mixed $duration = null): void
     {
         $duration ?? Carbon::now()->addDay();
 
@@ -183,12 +174,44 @@ trait LaravelBlock
     }
 
     /**
+     * Returns IDs of the users a user is blocking.
+     *
+     * @return array
+     * @throws
+     */
+    public function getBlockingCache(): array
+    {
+        return cache()->get('blocking.' . auth()->id()) ?? [];
+    }
+
+    /**
      * Returns IDs of the users who are blocking a user.
      *
      * @return array
+     * @throws
      */
     public function getBlockersCache(): array
     {
         return cache()->get('blockers.' . auth()->id()) ?? [];
+    }
+
+    /**
+     * Clears the Blocking cache.
+     *
+     * @return void
+     */
+    public function clearBlockingCache(): void
+    {
+        cache()->forget('blocking.' . auth()->id());
+    }
+
+    /**
+     * Clears the Blockers cache.
+     *
+     * @return void
+     */
+    public function clearBlockersCache(): void
+    {
+        cache()->forget('blockers.' . auth()->id());
     }
 }
