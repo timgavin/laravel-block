@@ -2,9 +2,9 @@
 
 namespace TimGavin\LaravelBlock\Models;
 
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Block extends Model
 {
@@ -22,18 +22,18 @@ class Block extends Model
      *
      * @return BelongsTo
      */
-public function blocking(): BelongsTo
-{
-    return $this->belongsTo(config('auth.providers.users.model'), 'blocking_id');
-}
-
-    /**
-     * Returns who is blocking a user.
-     *
-     * @return BelongsTo
-     */
-    public function blockers(): BelongsTo
+    public function blocking(): BelongsTo
     {
-        return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
+        return $this->belongsTo(config('auth.providers.users.model'), 'blocking_id');
     }
+
+        /**
+         * Returns who is blocking a user.
+         *
+         * @return BelongsTo
+         */
+        public function blockers(): BelongsTo
+        {
+            return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
+        }
 }
