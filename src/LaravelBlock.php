@@ -48,7 +48,7 @@ trait LaravelBlock
     public function isBlocking(mixed $user): bool
     {
         $user_id = is_int($user) ? $user : $user->id;
-        
+
         $isBlocking = Block::toBase()
             ->where('user_id', $this->id)
             ->where('blocking_id', $user_id)
