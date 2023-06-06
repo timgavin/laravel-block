@@ -11,41 +11,47 @@ trait LaravelBlock
     /**
      * Block the given user.
      *
-     * @param  User  $user
+     * @param  mixed  $user
      * @return void
      */
-    public function block($user): void
+    public function block(mixed $user): void
     {
+        $user_id = is_int($user) ? $user : $user->id;
+
         Block::firstOrCreate([
             'user_id' => $this->id,
-            'blocking_id' => $user->id,
+            'blocking_id' => $user_id,
         ]);
     }
 
     /**
      * Unblock the given user.
      *
-     * @param  User  $user
+     * @param  mixed $user
      * @return void
      */
-    public function unblock($user): void
+    public function unblock(mixed $user): void
     {
+        $user_id = is_int($user) ? $user : $user->id;
+
         Block::where('user_id', $this->id)
-            ->where('blocking_id', $user->id)
+            ->where('blocking_id', $user_id)
             ->delete();
     }
 
     /**
      * Check if a user is blocking the given user.
      *
-     * @param  User  $user
+     * @param  mixed $user
      * @return bool
      */
-    public function isBlocking($user): bool
+    public function isBlocking(mixed $user): bool
     {
+        $user_id = is_int($user) ? $user : $user->id;
+        
         $isBlocking = Block::toBase()
             ->where('user_id', $this->id)
-            ->where('blocking_id', $user->id)
+            ->where('blocking_id', $user_id)
             ->first();
 
         if ($isBlocking) {
@@ -58,13 +64,15 @@ trait LaravelBlock
     /**
      * Check if a user is blocked by the given user.
      *
-     * @param  User  $user
+     * @param  mixed $user
      * @return bool
      */
-    public function isBlockedBy($user): bool
+    public function isBlockedBy(mixed $user): bool
     {
+        $user_id = is_int($user) ? $user : $user->id;
+
         $isBlockedBy = Block::toBase()
-            ->where('user_id', $user->id)
+            ->where('user_id', $user_id)
             ->where('blocking_id', $this->id)
             ->first();
 
@@ -78,7 +86,7 @@ trait LaravelBlock
     /**
      * Returns the users a user is blocking.
      *
-     * @return Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlocking()
     {
@@ -90,7 +98,7 @@ trait LaravelBlock
     /**
      * Returns the users who are blocking a user.
      *
-     * @return Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlockers()
     {

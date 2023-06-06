@@ -2,6 +2,11 @@
 
 All notable changes to `Laravel Block` will be documented in this file.
 
+## Version 1.1.6
+
+- You can now follow/unfollow by User ID
+- Cleaned up return types and added tests
+
 ## Version 1.1.5
 
 - Added cache clearing methods

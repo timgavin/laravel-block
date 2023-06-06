@@ -24,6 +24,20 @@ class BlockTest extends TestCase
     }
 
     /** @test */
+    public function a_user_can_block_another_user_by_id()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user1->block($user2->id);
+
+        $this->assertDatabaseHas('blocks', [
+            'user_id' => 1,
+            'blocking_id' => 2,
+        ]);
+    }
+
+    /** @test */
     public function a_user_can_unblock_another_user()
     {
         $user1 = User::create();
@@ -31,6 +45,21 @@ class BlockTest extends TestCase
 
         $user1->block($user2);
         $user1->unblock($user2);
+
+        $this->assertDatabaseMissing('blocks', [
+            'user_id' => 1,
+            'blocking_id' => 2,
+        ]);
+    }
+
+    /** @test */
+    public function a_user_can_unblock_another_user_by_id()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user1->block($user2->id);
+        $user1->unblock($user2->id);
 
         $this->assertDatabaseMissing('blocks', [
             'user_id' => 1,
@@ -54,6 +83,21 @@ class BlockTest extends TestCase
     }
 
     /** @test */
+    public function is_a_user_blocking_another_user_by_id()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user1->block($user2->id);
+
+        if ($user1->isBlocking($user2->id)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
+    }
+
+    /** @test */
     public function is_a_user_blocked_by_another_user()
     {
         $user1 = User::create();
@@ -62,6 +106,21 @@ class BlockTest extends TestCase
         $user1->block($user2);
 
         if ($user2->isBlockedBy($user1)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
+    }
+
+    /** @test */
+    public function is_a_user_blocked_by_another_user_by_id()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user1->block($user2->id);
+
+        if ($user2->isBlockedBy($user1->id)) {
             $this->assertTrue(true);
         } else {
             $this->fail();
