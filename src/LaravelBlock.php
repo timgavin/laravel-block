@@ -27,7 +27,7 @@ trait LaravelBlock
     /**
      * Unblock the given user.
      *
-     * @param  mixed $user
+     * @param  mixed  $user
      * @return void
      */
     public function unblock(mixed $user): void
@@ -42,7 +42,7 @@ trait LaravelBlock
     /**
      * Check if a user is blocking the given user.
      *
-     * @param  mixed $user
+     * @param  mixed  $user
      * @return bool
      */
     public function isBlocking(mixed $user): bool
@@ -64,7 +64,7 @@ trait LaravelBlock
     /**
      * Check if a user is blocked by the given user.
      *
-     * @param  mixed $user
+     * @param  mixed  $user
      * @return bool
      */
     public function isBlockedBy(mixed $user): bool
