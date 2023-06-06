@@ -150,7 +150,7 @@ trait LaravelBlock
     /**
      * Caches IDs of the users a user is blocking.
      *
-     * @param mixed $duration
+     * @param  mixed  $duration
      * @return void
      */
     public function cacheBlocking(mixed $duration = null): void
@@ -167,7 +167,7 @@ trait LaravelBlock
     /**
      * Caches IDs of the users who are blocking a user.
      *
-     * @param mixed|null $duration
+     * @param  mixed|null  $duration
      * @return void
      */
     public function cacheBlockers(mixed $duration = null): void
@@ -185,6 +185,7 @@ trait LaravelBlock
      * Returns IDs of the users a user is blocking.
      *
      * @return array
+     *
      * @throws
      */
     public function getBlockingCache(): array
@@ -196,6 +197,7 @@ trait LaravelBlock
      * Returns IDs of the users who are blocking a user.
      *
      * @return array
+     *
      * @throws
      */
     public function getBlockersCache(): array
