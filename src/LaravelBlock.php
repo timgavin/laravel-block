@@ -49,6 +49,14 @@ trait LaravelBlock
     {
         $user_id = is_int($user) ? $user : $user->id;
 
+        if (cache()->has('blocking.'.$this->id)) {
+            if (in_array($user_id, $this->getBlockingCache())) {
+                return true;
+            }
+
+            return false;
+        }
+
         $isBlocking = Block::toBase()
             ->where('user_id', $this->id)
             ->where('blocking_id', $user_id)
@@ -70,6 +78,14 @@ trait LaravelBlock
     public function isBlockedBy(mixed $user): bool
     {
         $user_id = is_int($user) ? $user : $user->id;
+
+        if (cache()->has('blocking.'.$this->id)) {
+            if (in_array($this->id, $this->getBlockersCache())) {
+                return true;
+            }
+
+            return false;
+        }
 
         $isBlockedBy = Block::toBase()
             ->where('user_id', $user_id)
@@ -155,11 +171,11 @@ trait LaravelBlock
      */
     public function cacheBlocking(mixed $duration = null): void
     {
-        $duration ?? Carbon::now()->addDay();
+            $duration ?? Carbon::now()->addDay();
 
-        cache()->forget('blocking.' . auth()->id());
+        cache()->forget('blocking.'.auth()->id());
 
-        cache()->remember('blocking.' . auth()->id(), $duration, function () {
+        cache()->remember('blocking.'.auth()->id(), $duration, function () {
             return auth()->user()->getBlockingIds();
         });
     }
@@ -172,11 +188,11 @@ trait LaravelBlock
      */
     public function cacheBlockers(mixed $duration = null): void
     {
-        $duration ?? Carbon::now()->addDay();
+            $duration ?? Carbon::now()->addDay();
 
-        cache()->forget('blockers.' . auth()->id());
+        cache()->forget('blockers.'.auth()->id());
 
-        cache()->remember('blockers.' . auth()->id(), $duration, function () {
+        cache()->remember('blockers.'.auth()->id(), $duration, function () {
             return auth()->user()->getBlockersIds();
         });
     }
@@ -190,7 +206,7 @@ trait LaravelBlock
      */
     public function getBlockingCache(): array
     {
-        return cache()->get('blocking.' . auth()->id()) ?? [];
+        return cache()->get('blocking.'.auth()->id()) ?? [];
     }
 
     /**
@@ -202,7 +218,7 @@ trait LaravelBlock
      */
     public function getBlockersCache(): array
     {
-        return cache()->get('blockers.' . auth()->id()) ?? [];
+        return cache()->get('blockers.'.auth()->id()) ?? [];
     }
 
     /**
@@ -212,7 +228,7 @@ trait LaravelBlock
      */
     public function clearBlockingCache(): void
     {
-        cache()->forget('blocking.' . auth()->id());
+        cache()->forget('blocking.'.auth()->id());
     }
 
     /**
@@ -222,6 +238,6 @@ trait LaravelBlock
      */
     public function clearBlockersCache(): void
     {
-        cache()->forget('blockers.' . auth()->id());
+        cache()->forget('blockers.'.auth()->id());
     }
 }

@@ -2,6 +2,10 @@
 
 All notable changes to `Laravel Block` will be documented in this file.
 
+## Version 1.1.7
+
+- Updated caching methods
+
 ## Version 1.1.6
 
 - You can now block/unblock by User ID

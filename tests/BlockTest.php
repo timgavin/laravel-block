@@ -83,6 +83,24 @@ class BlockTest extends TestCase
     }
 
     /** @test */
+    public function is_a_user_blocking_another_user_in_cache()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $this->actingAs($user1);
+
+        $user1->block($user2);
+        $user1->cacheBlocking();
+
+        if ($user1->isBlocking($user2)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
+    }
+
+    /** @test */
     public function is_a_user_blocking_another_user_by_id()
     {
         $user1 = User::create();
@@ -106,6 +124,25 @@ class BlockTest extends TestCase
         $user1->block($user2);
 
         if ($user2->isBlockedBy($user1)) {
+            $this->assertTrue(true);
+        } else {
+            $this->fail();
+        }
+    }
+
+    /** @test */
+    public function is_a_user_blocked_by_another_user_in_cache()
+    {
+        $user1 = User::create();
+        $user2 = User::create();
+
+        $user2->block($user1);
+
+        $this->actingAs($user1);
+
+        auth()->user()->cacheBlockers();
+
+        if (auth()->user()->isBlockedBy($user2)) {
             $this->assertTrue(true);
         } else {
             $this->fail();
@@ -202,7 +239,7 @@ class BlockTest extends TestCase
         auth()->user()->block($user2);
         auth()->user()->cacheBlocking();
 
-        $this->assertContains(2, cache('blocking.' . auth()->id()));
+        $this->assertContains(2, cache('blocking.'.auth()->id()));
     }
 
     /** @test */
@@ -231,7 +268,7 @@ class BlockTest extends TestCase
 
         auth()->user()->cacheBlockers();
 
-        $this->assertContains(2, cache('blockers.' . auth()->id()));
+        $this->assertContains(2, cache('blockers.'.auth()->id()));
     }
 
     /** @test */
