@@ -2,6 +2,11 @@
 
 All notable changes to `Laravel Block` will be documented in this file.
 
+## 1.1.8
+
+- Bug fixes
+- Updated README
+
 ## Version 1.1.7
 
 - Updated caching methods

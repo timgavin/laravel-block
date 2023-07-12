@@ -146,7 +146,7 @@ MIT. Please see the [license file](license.md) for more information.
 
 [ico-version]: https://img.shields.io/packagist/v/timgavin/laravel-block.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timgavin/laravel-block.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/timgavin/laravel-block/master.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/com/timgavin/laravel-block/master.svg?style=flat-square
 [ico-styleci]: https://styleci.io/repos/545076824/shield
 
 [link-packagist]: https://packagist.org/packages/timgavin/laravel-block

@@ -10,8 +10,7 @@ trait LaravelBlock
 {
     /**
      * Block the given user.
-     *
-     * @param  mixed  $user
+     * @param mixed $user
      * @return void
      */
     public function block(mixed $user): void
@@ -26,8 +25,7 @@ trait LaravelBlock
 
     /**
      * Unblock the given user.
-     *
-     * @param  mixed  $user
+     * @param mixed $user
      * @return void
      */
     public function unblock(mixed $user): void
@@ -41,15 +39,14 @@ trait LaravelBlock
 
     /**
      * Check if a user is blocking the given user.
-     *
-     * @param  mixed  $user
+     * @param mixed $user
      * @return bool
      */
     public function isBlocking(mixed $user): bool
     {
         $user_id = is_int($user) ? $user : $user->id;
 
-        if (cache()->has('blocking.'.$this->id)) {
+        if (cache()->has('blocking.' . $this->id)) {
             if (in_array($user_id, $this->getBlockingCache())) {
                 return true;
             }
@@ -71,16 +68,15 @@ trait LaravelBlock
 
     /**
      * Check if a user is blocked by the given user.
-     *
-     * @param  mixed  $user
+     * @param mixed $user
      * @return bool
      */
     public function isBlockedBy(mixed $user): bool
     {
         $user_id = is_int($user) ? $user : $user->id;
 
-        if (cache()->has('blocking.'.$this->id)) {
-            if (in_array($this->id, $this->getBlockersCache())) {
+        if (cache()->has('blockers.' . $user_id)) {
+            if (in_array($user_id, $this->getBlockersCache())) {
                 return true;
             }
 
@@ -101,7 +97,6 @@ trait LaravelBlock
 
     /**
      * Returns the users a user is blocking.
-     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlocking()
@@ -113,7 +108,6 @@ trait LaravelBlock
 
     /**
      * Returns the users who are blocking a user.
-     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlockers()
@@ -125,7 +119,6 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users a user is blocking.
-     *
      * @return array
      */
     public function getBlockingIds(): array
@@ -138,7 +131,6 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users who are blocking a user.
-     *
      * @return array
      */
     public function getBlockersIds(): array
@@ -152,7 +144,6 @@ trait LaravelBlock
     /**
      * Returns IDs of the users a user is blocking.
      * Returns IDs of the users who are blocking a user.
-     *
      * @return array
      */
     public function getBlockingAndBlockersIds(): array
@@ -165,79 +156,71 @@ trait LaravelBlock
 
     /**
      * Caches IDs of the users a user is blocking.
-     *
-     * @param  mixed  $duration
+     * @param mixed $duration
      * @return void
      */
     public function cacheBlocking(mixed $duration = null): void
     {
-            $duration ?? Carbon::now()->addDay();
+        $duration ?? Carbon::now()->addDay();
 
-        cache()->forget('blocking.'.auth()->id());
+        cache()->forget('blocking.' . auth()->id());
 
-        cache()->remember('blocking.'.auth()->id(), $duration, function () {
+        cache()->remember('blocking.' . auth()->id(), $duration, function () {
             return auth()->user()->getBlockingIds();
         });
     }
 
     /**
      * Caches IDs of the users who are blocking a user.
-     *
-     * @param  mixed|null  $duration
+     * @param mixed|null $duration
      * @return void
      */
     public function cacheBlockers(mixed $duration = null): void
     {
-            $duration ?? Carbon::now()->addDay();
+        $duration ?? Carbon::now()->addDay();
 
-        cache()->forget('blockers.'.auth()->id());
+        cache()->forget('blockers.' . auth()->id());
 
-        cache()->remember('blockers.'.auth()->id(), $duration, function () {
+        cache()->remember('blockers.' . auth()->id(), $duration, function () {
             return auth()->user()->getBlockersIds();
         });
     }
 
     /**
      * Returns IDs of the users a user is blocking.
-     *
      * @return array
-     *
      * @throws
      */
     public function getBlockingCache(): array
     {
-        return cache()->get('blocking.'.auth()->id()) ?? [];
+        return cache()->get('blocking.' . auth()->id()) ?? [];
     }
 
     /**
      * Returns IDs of the users who are blocking a user.
-     *
      * @return array
-     *
      * @throws
      */
     public function getBlockersCache(): array
     {
-        return cache()->get('blockers.'.auth()->id()) ?? [];
+        return cache()->get('blockers.' . auth()->id()) ?? [];
     }
 
     /**
      * Clears the Blocking cache.
-     *
      * @return void
      */
     public function clearBlockingCache(): void
     {
-        cache()->forget('blocking.'.auth()->id());
+        cache()->forget('blocking.' . auth()->id());
     }
 
     /**
      * Clears the Blockers cache.
-     *
      * @return void
      */
     public function clearBlockersCache(): void
     {
-        cache()->forget('blockers.'.auth()->id());
+        cache()->forget('blockers.' . auth()->id());
     }
 }
