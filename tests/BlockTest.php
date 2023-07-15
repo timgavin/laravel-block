@@ -239,7 +239,7 @@ class BlockTest extends TestCase
         auth()->user()->block($user2);
         auth()->user()->cacheBlocking();
 
-        $this->assertContains(2, cache('blocking.'.auth()->id()));
+        $this->assertContains(2, cache('blocking.' . auth()->id()));
     }
 
     /** @test */
@@ -268,7 +268,7 @@ class BlockTest extends TestCase
 
         auth()->user()->cacheBlockers();
 
-        $this->assertContains(2, cache('blockers.'.auth()->id()));
+        $this->assertContains(2, cache('blockers.' . auth()->id()));
     }
 
     /** @test */
