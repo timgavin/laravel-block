@@ -2,7 +2,6 @@
 
 namespace TimGavin\LaravelBlock;
 
-use App\Models\User;
 use Carbon\Carbon;
 use TimGavin\LaravelBlock\Models\Block;
 
@@ -10,7 +9,8 @@ trait LaravelBlock
 {
     /**
      * Block the given user.
-     * @param mixed $user
+     *
+     * @param  mixed  $user
      * @return void
      */
     public function block(mixed $user): void
@@ -25,7 +25,8 @@ trait LaravelBlock
 
     /**
      * Unblock the given user.
-     * @param mixed $user
+     *
+     * @param  mixed  $user
      * @return void
      */
     public function unblock(mixed $user): void
@@ -39,7 +40,8 @@ trait LaravelBlock
 
     /**
      * Check if a user is blocking the given user.
-     * @param mixed $user
+     *
+     * @param  mixed  $user
      * @return bool
      */
     public function isBlocking(mixed $user): bool
@@ -68,7 +70,8 @@ trait LaravelBlock
 
     /**
      * Check if a user is blocked by the given user.
-     * @param mixed $user
+     *
+     * @param  mixed  $user
      * @return bool
      */
     public function isBlockedBy(mixed $user): bool
@@ -97,6 +100,7 @@ trait LaravelBlock
 
     /**
      * Returns the users a user is blocking.
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlocking()
@@ -108,6 +112,7 @@ trait LaravelBlock
 
     /**
      * Returns the users who are blocking a user.
+     *
      * @return \Illuminate\Database\Eloquent\Collection
      */
     public function getBlockers()
@@ -119,6 +124,7 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users a user is blocking.
+     *
      * @return array
      */
     public function getBlockingIds(): array
@@ -131,6 +137,7 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users who are blocking a user.
+     *
      * @return array
      */
     public function getBlockersIds(): array
@@ -144,6 +151,7 @@ trait LaravelBlock
     /**
      * Returns IDs of the users a user is blocking.
      * Returns IDs of the users who are blocking a user.
+     *
      * @return array
      */
     public function getBlockingAndBlockersIds(): array
@@ -156,7 +164,8 @@ trait LaravelBlock
 
     /**
      * Caches IDs of the users a user is blocking.
-     * @param mixed $duration
+     *
+     * @param  mixed  $duration
      * @return void
      */
     public function cacheBlocking(mixed $duration = null): void
@@ -172,7 +181,8 @@ trait LaravelBlock
 
     /**
      * Caches IDs of the users who are blocking a user.
-     * @param mixed|null $duration
+     *
+     * @param  mixed|null  $duration
      * @return void
      */
     public function cacheBlockers(mixed $duration = null): void
@@ -188,7 +198,9 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users a user is blocking.
+     *
      * @return array
+     *
      * @throws
      */
     public function getBlockingCache(): array
@@ -198,7 +210,9 @@ trait LaravelBlock
 
     /**
      * Returns IDs of the users who are blocking a user.
+     *
      * @return array
+     *
      * @throws
      */
     public function getBlockersCache(): array
@@ -208,6 +222,7 @@ trait LaravelBlock
 
     /**
      * Clears the Blocking cache.
+     *
      * @return void
      */
     public function clearBlockingCache(): void
@@ -217,6 +232,7 @@ trait LaravelBlock
 
     /**
      * Clears the Blockers cache.
+     *
      * @return void
      */
     public function clearBlockersCache(): void
