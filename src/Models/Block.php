@@ -27,13 +27,13 @@ class Block extends Model
         return $this->belongsTo(config('auth.providers.users.model'), 'blocking_id');
     }
 
-        /**
-         * Returns who is blocking a user.
-         *
-         * @return BelongsTo
-         */
-        public function blockers(): BelongsTo
-        {
-            return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
-        }
+    /**
+     * Returns who is blocking a user.
+     *
+     * @return BelongsTo
+     */
+    public function blockers(): BelongsTo
+    {
+        return $this->belongsTo(config('auth.providers.users.model'), 'user_id');
+    }
 }
