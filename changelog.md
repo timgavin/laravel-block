@@ -2,6 +2,10 @@
 
 All notable changes to `Laravel Block` will be documented in this file.
 
+## 1.1.10
+
+- Added ability to publish migrations and config
+
 ## 1.1.9
 
 - Replaced `auth()` with `$this`
