@@ -34,7 +34,7 @@ class LaravelBlockServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/laravel-block.php', 'laravel-block');
 
         $this->app->singleton('laravel-block', function ($app) {
-            return new LaravelBlockManager();
+            return new LaravelBlockManager;
         });
     }
 

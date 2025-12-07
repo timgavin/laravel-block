@@ -180,7 +180,7 @@ it('caches the ids of users a user is blocking', function () {
     auth()->user()->block($user2);
     auth()->user()->cacheBlocking();
 
-    expect(cache('laravel-block:blocking.' . auth()->id()))->toContain(2);
+    expect(cache('laravel-block:blocking.'.auth()->id()))->toContain(2);
 });
 
 it('gets the cached ids of users a user is blocking', function () {
@@ -205,7 +205,7 @@ it('caches the ids of users who are blocking a user', function () {
 
     auth()->user()->cacheBlockers();
 
-    expect(cache('laravel-block:blockers.' . auth()->id()))->toContain(2);
+    expect(cache('laravel-block:blockers.'.auth()->id()))->toContain(2);
 });
 
 it('gets the cached ids of users who are blocking a user', function () {
@@ -603,4 +603,3 @@ it('clears the blocking cache for another user by id', function () {
 
     expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
 });
-
