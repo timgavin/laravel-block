@@ -41,7 +41,7 @@ trait LaravelBlock
         }
 
         $block = Block::firstOrCreate([
-            'user_id' => $this->id,
+            'user_id'     => $this->id,
             'blocking_id' => $user_id,
         ]);
 

@@ -17,8 +17,8 @@ abstract class TestCase extends \Orchestra\Testbench\TestCase
     {
         $app['config']->set('cache.default', 'array');
 
-        include_once __DIR__ . '/migrations/create_users_table.php';
+        include_once __DIR__.'/migrations/create_users_table.php';
 
-        (new \CreateUsersTable)->up();
+        (new \CreateUsersTable())->up();
     }
 }
