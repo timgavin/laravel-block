@@ -327,7 +327,7 @@ MIT. Please see the [license file](license.md) for more information.
 
 [ico-version]: https://img.shields.io/packagist/v/timgavin/laravel-block.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/timgavin/laravel-block.svg?style=flat-square
-[ico-tests]: https://img.shields.io/github/actions/workflow/status/timgavin/laravel-block/tests.yml?branch=main&label=tests&style=flat-square
+[ico-tests]: https://img.shields.io/github/actions/workflow/status/timgavin/laravel-block/tests.yml?branch=master&label=tests&style=flat-square
 
 [link-packagist]: https://packagist.org/packages/timgavin/laravel-block
 [link-downloads]: https://packagist.org/packages/timgavin/laravel-block
