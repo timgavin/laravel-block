@@ -9,7 +9,7 @@ it('allows a user to block another user', function () {
     $user1->block($user2);
 
     $this->assertDatabaseHas('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 2,
     ]);
 });
@@ -21,7 +21,7 @@ it('allows a user to block another user by id', function () {
     $user1->block($user2->id);
 
     $this->assertDatabaseHas('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 2,
     ]);
 });
@@ -34,7 +34,7 @@ it('allows a user to unblock another user', function () {
     $user1->unblock($user2);
 
     $this->assertDatabaseMissing('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 2,
     ]);
 });
@@ -47,7 +47,7 @@ it('allows a user to unblock another user by id', function () {
     $user1->unblock($user2->id);
 
     $this->assertDatabaseMissing('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 2,
     ]);
 });
@@ -339,7 +339,7 @@ it('prevents a user from blocking themselves', function () {
     $user1->block($user1);
 
     $this->assertDatabaseMissing('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 1,
     ]);
 });
@@ -350,7 +350,7 @@ it('prevents a user from blocking themselves by id', function () {
     $user1->block($user1->id);
 
     $this->assertDatabaseMissing('blocks', [
-        'user_id' => 1,
+        'user_id'     => 1,
         'blocking_id' => 1,
     ]);
 });

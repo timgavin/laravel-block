@@ -7,10 +7,12 @@ use Illuminate\Queue\SerializesModels;
 
 class UserUnblocked
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public int $userId,
         public int $unblockedId,
-    ) {}
+    ) {
+    }
 }

@@ -41,7 +41,7 @@ trait LaravelBlock
         }
 
         $block = Block::firstOrCreate([
-            'user_id' => $this->id,
+            'user_id'     => $this->id,
             'blocking_id' => $user_id,
         ]);
 
@@ -363,7 +363,7 @@ trait LaravelBlock
         $user_id = is_int($user) ? $user : ($user->id ?? null);
 
         if ($user_id === null) {
-            return new Collection;
+            return new Collection();
         }
 
         return Block::where(function ($query) use ($user_id) {
