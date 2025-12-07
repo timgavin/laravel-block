@@ -9,6 +9,7 @@ All notable changes to `Laravel Block` will be documented in this file.
 ## 1.1.9
 
 - Replaced `auth()` with `$this`
+- Added method to get latest blockers
 
 ## 1.1.8
 

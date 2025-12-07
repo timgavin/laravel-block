@@ -1,334 +1,606 @@
 <?php
 
-namespace TimGavin\LaravelBlock\Tests;
-
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use TimGavin\LaravelBlock\Models\User;
 
-class BlockTest extends TestCase
-{
-    use RefreshDatabase;
+it('allows a user to block another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function a_user_can_block_another_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
 
-        $user1->block($user2);
+    $this->assertDatabaseHas('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 2,
+    ]);
+});
 
-        $this->assertDatabaseHas('blocks', [
-            'user_id' => 1,
-            'blocking_id' => 2,
-        ]);
-    }
+it('allows a user to block another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function a_user_can_block_another_user_by_id()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2->id);
 
-        $user1->block($user2->id);
+    $this->assertDatabaseHas('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 2,
+    ]);
+});
 
-        $this->assertDatabaseHas('blocks', [
-            'user_id' => 1,
-            'blocking_id' => 2,
-        ]);
-    }
+it('allows a user to unblock another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function a_user_can_unblock_another_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
+    $user1->unblock($user2);
 
-        $user1->block($user2);
-        $user1->unblock($user2);
+    $this->assertDatabaseMissing('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 2,
+    ]);
+});
 
-        $this->assertDatabaseMissing('blocks', [
-            'user_id' => 1,
-            'blocking_id' => 2,
-        ]);
-    }
+it('allows a user to unblock another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function a_user_can_unblock_another_user_by_id()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2->id);
+    $user1->unblock($user2->id);
 
-        $user1->block($user2->id);
-        $user1->unblock($user2->id);
+    $this->assertDatabaseMissing('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 2,
+    ]);
+});
 
-        $this->assertDatabaseMissing('blocks', [
-            'user_id' => 1,
-            'blocking_id' => 2,
-        ]);
-    }
+it('checks if a user is blocking another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function is_a_user_blocking_another_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
 
-        $user1->block($user2);
+    expect($user1->isBlocking($user2))->toBeTrue();
+});
 
-        if ($user1->isBlocking($user2)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
+it('checks if a user is blocking another user in cache', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $this->actingAs($user1);
+
+    $user1->block($user2);
+    $user1->cacheBlocking();
+
+    expect($user1->isBlocking($user2))->toBeTrue();
+});
+
+it('checks if a user is blocking another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2->id);
+
+    expect($user1->isBlocking($user2->id))->toBeTrue();
+});
+
+it('checks if a user is blocked by another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    expect($user2->isBlockedBy($user1))->toBeTrue();
+});
+
+it('checks if a user is blocked by another user in cache', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $this->actingAs($user1);
+
+    auth()->user()->cacheBlockers();
+
+    expect(auth()->user()->isBlockedBy($user2))->toBeTrue();
+});
+
+it('checks if a user is blocked by another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2->id);
+
+    expect($user2->isBlockedBy($user1->id))->toBeTrue();
+});
+
+it('gets the users a user is blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    $blocking = $user1->getBlocking();
+
+    expect($blocking)->toHaveCount(1);
+    expect($blocking->first()->blocking->id)->toBe(2);
+});
+
+it('gets the ids of users a user is blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    $blockingIds = $user1->getBlockingIds();
+
+    expect($blockingIds)->toContain(2);
+});
+
+it('gets the users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $blockers = $user1->getBlockers();
+
+    expect($blockers)->toHaveCount(1);
+    expect($blockers->first()->blocking->id)->toBe(1);
+});
+
+it('gets the latest users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $blockers = $user1->getLatestBlockers(1);
+
+    expect($blockers)->toHaveCount(1);
+    expect($blockers->first()->blocking->id)->toBe(1);
+});
+
+it('gets the ids of users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $blockerIds = $user1->getBlockersIds();
+
+    expect($blockerIds)->toContain(2);
+});
+
+it('caches the ids of users a user is blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $this->actingAs($user1);
+
+    auth()->user()->block($user2);
+    auth()->user()->cacheBlocking();
+
+    expect(cache('laravel-block:blocking.' . auth()->id()))->toContain(2);
+});
+
+it('gets the cached ids of users a user is blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $this->actingAs($user1);
+
+    auth()->user()->block($user2);
+    auth()->user()->cacheBlocking();
+
+    expect(auth()->user()->getBlockingCache())->toContain(2);
+});
+
+it('caches the ids of users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $this->actingAs($user1);
+
+    auth()->user()->cacheBlockers();
+
+    expect(cache('laravel-block:blockers.' . auth()->id()))->toContain(2);
+});
+
+it('gets the cached ids of users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $this->actingAs($user1);
+
+    auth()->user()->cacheBlockers();
+
+    expect(auth()->user()->getBlockersCache())->toContain(2);
+});
+
+it('clears the cached ids of users a user is blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $this->actingAs($user1);
+
+    auth()->user()->cacheBlocking();
+    auth()->user()->clearBlockingCache();
+
+    expect(auth()->user()->getBlockingCache())->toBeEmpty();
+});
+
+it('clears the cached ids of users who are blocking a user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $this->actingAs($user1);
+
+    auth()->user()->cacheBlockers();
+    auth()->user()->clearBlockersCache();
+
+    expect(auth()->user()->getBlockersCache())->toBeEmpty();
+});
+
+it('returns the blocks relationship', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    expect($user1->blocks)->toHaveCount(1);
+    expect($user1->blocks->first()->blocking_id)->toBe(2);
+});
+
+it('returns the blockers relationship', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    expect($user1->blockers)->toHaveCount(1);
+    expect($user1->blockers->first()->user_id)->toBe(2);
+});
+
+it('checks if users have any block relationship', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user1->block($user2);
+
+    expect($user1->hasBlockWith($user2))->toBeTrue();
+    expect($user2->hasBlockWith($user1))->toBeTrue();
+    expect($user1->hasBlockWith($user3))->toBeFalse();
+});
+
+it('gets block relationships between two users', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+    $user2->block($user1);
+
+    $relationships = $user1->getBlockRelationshipsWith($user2);
+
+    expect($relationships)->toHaveCount(2);
+});
+
+it('gets the blocking relationship record', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    $relationship = $user1->getBlockingRelationship($user2);
+
+    expect($relationship)->not->toBeNull();
+    expect($relationship->user_id)->toBe(1);
+    expect($relationship->blocking_id)->toBe(2);
+});
+
+it('gets the blocker relationship record', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $relationship = $user1->getBlockerRelationship($user2);
+
+    expect($relationship)->not->toBeNull();
+    expect($relationship->user_id)->toBe(2);
+    expect($relationship->blocking_id)->toBe(1);
+});
+
+it('gets the combined blocking and blockers ids', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user1->block($user2);
+    $user3->block($user1);
+
+    $ids = $user1->getBlockingAndBlockersIds();
+
+    expect($ids['blocking'])->toContain(2);
+    expect($ids['blockers'])->toContain(3);
+});
+
+it('prevents a user from blocking themselves', function () {
+    $user1 = User::create();
+
+    $user1->block($user1);
+
+    $this->assertDatabaseMissing('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 1,
+    ]);
+});
+
+it('prevents a user from blocking themselves by id', function () {
+    $user1 = User::create();
+
+    $user1->block($user1->id);
+
+    $this->assertDatabaseMissing('blocks', [
+        'user_id' => 1,
+        'blocking_id' => 1,
+    ]);
+});
+
+// New v2.0 tests
+
+it('returns true when block is successful', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $result = $user1->block($user2);
+
+    expect($result)->toBeTrue();
+});
+
+it('returns false when already blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+    $result = $user1->block($user2);
+
+    expect($result)->toBeFalse();
+});
+
+it('returns true when unblock is successful', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+    $result = $user1->unblock($user2);
+
+    expect($result)->toBeTrue();
+});
+
+it('returns false when not blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $result = $user1->unblock($user2);
+
+    expect($result)->toBeFalse();
+});
+
+it('toggles block on', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $result = $user1->toggleBlock($user2);
+
+    expect($result)->toBeTrue();
+    expect($user1->isBlocking($user2))->toBeTrue();
+});
+
+it('toggles block off', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+    $result = $user1->toggleBlock($user2);
+
+    expect($result)->toBeFalse();
+    expect($user1->isBlocking($user2))->toBeFalse();
+});
+
+it('gets the blocking count', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user1->block($user2);
+    $user1->block($user3);
+
+    expect($user1->getBlockingCount())->toBe(2);
+});
+
+it('gets the blockers count', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user2->block($user1);
+    $user3->block($user1);
+
+    expect($user1->getBlockersCount())->toBe(2);
+});
+
+it('checks if users are mutually blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+    expect($user1->isMutuallyBlocking($user2))->toBeFalse();
+
+    $user2->block($user1);
+    expect($user1->isMutuallyBlocking($user2))->toBeTrue();
+});
+
+it('gets blocking with pagination', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    $paginated = $user1->getBlockingPaginated(10);
+
+    expect($paginated)->toBeInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class);
+    expect($paginated->total())->toBe(1);
+});
+
+it('gets blockers with pagination', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user2->block($user1);
+
+    $paginated = $user1->getBlockersPaginated(10);
+
+    expect($paginated)->toBeInstanceOf(\Illuminate\Contracts\Pagination\LengthAwarePaginator::class);
+    expect($paginated->total())->toBe(1);
+});
+
+it('dispatches UserBlocked event when blocking', function () {
+    \Illuminate\Support\Facades\Event::fake();
+
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    \Illuminate\Support\Facades\Event::assertDispatched(
+        \TimGavin\LaravelBlock\Events\UserBlocked::class,
+        function ($event) {
+            return $event->userId === 1 && $event->blockedId === 2;
         }
-    }
+    );
+});
 
-    /** @test */
-    public function is_a_user_blocking_another_user_in_cache()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+it('dispatches UserUnblocked event when unblocking', function () {
+    \Illuminate\Support\Facades\Event::fake();
 
-        $this->actingAs($user1);
+    $user1 = User::create();
+    $user2 = User::create();
 
-        $user1->block($user2);
-        $user1->cacheBlocking();
+    $user1->block($user2);
+    $user1->unblock($user2);
 
-        if ($user1->isBlocking($user2)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
+    \Illuminate\Support\Facades\Event::assertDispatched(
+        \TimGavin\LaravelBlock\Events\UserUnblocked::class,
+        function ($event) {
+            return $event->userId === 1 && $event->unblockedId === 2;
         }
-    }
+    );
+});
 
-    /** @test */
-    public function is_a_user_blocking_another_user_by_id()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+it('clears cache when blocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
 
-        $user1->block($user2->id);
+    $user1->block($user2);
+    $user1->cacheBlocking();
 
-        if ($user1->isBlocking($user2->id)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
+    expect($user1->getBlockingCache())->toContain(2);
 
-    /** @test */
-    public function is_a_user_blocked_by_another_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user3);
 
-        $user1->block($user2);
+    expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
+});
 
-        if ($user2->isBlockedBy($user1)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
+it('clears cache when unblocking', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function is_a_user_blocked_by_another_user_in_cache()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
+    $user1->cacheBlocking();
 
-        $user2->block($user1);
+    expect($user1->getBlockingCache())->toContain(2);
 
-        $this->actingAs($user1);
+    $user1->unblock($user2);
 
-        auth()->user()->cacheBlockers();
+    expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
+});
 
-        if (auth()->user()->isBlockedBy($user2)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
+it('uses query scopes on Block model', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function is_a_user_blocked_by_another_user_by_id()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
 
-        $user1->block($user2->id);
+    $blocks = \TimGavin\LaravelBlock\Models\Block::whereUserBlocks(1)->get();
+    expect($blocks)->toHaveCount(1);
 
-        if ($user2->isBlockedBy($user1->id)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
+    $blockers = \TimGavin\LaravelBlock\Models\Block::whereUserIsBlockedBy(2)->get();
+    expect($blockers)->toHaveCount(1);
+});
 
-    /** @test */
-    public function it_gets_the_users_a_user_is_blocking()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+it('clears the blockers cache for another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-        $user1->block($user2);
+    $user1->block($user2);
+    $user2->cacheBlockers();
 
-        $blocking = $user1->getBlocking();
+    expect(cache()->has('laravel-block:blockers.2'))->toBeTrue();
 
-        foreach ($blocking as $item) {
-            if ($item->blocking->id === 2) {
-                $this->assertTrue(true);
-            } else {
-                $this->fail();
-            }
-        }
-    }
+    $user1->clearBlockersCacheFor($user2);
 
-    /** @test */
-    public function it_gets_the_ids_of_users_a_user_is_blocking()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    expect(cache()->has('laravel-block:blockers.2'))->toBeFalse();
+});
 
-        $user1->block($user2);
+it('clears the blockers cache for another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-        $blockingIds = $user1->getBlockingIds();
+    $user1->block($user2);
+    $user2->cacheBlockers();
 
-        $this->assertContains(2, $blockingIds);
-    }
+    expect(cache()->has('laravel-block:blockers.2'))->toBeTrue();
 
-    /** @test */
-    public function it_gets_the_users_who_are_blocking_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->clearBlockersCacheFor($user2->id);
 
-        $user2->block($user1);
+    expect(cache()->has('laravel-block:blockers.2'))->toBeFalse();
+});
 
-        $blockedBy = $user1->getBlockers();
+it('clears the blocking cache for another user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-        foreach ($blockedBy as $item) {
-            if ($item->blocking->id === 1) {
-                $this->assertTrue(true);
-            } else {
-                $this->fail();
-            }
-        }
-    }
+    $user1->block($user2);
+    $user1->cacheBlocking();
 
-    /** @test */
-    public function it_gets_the_ids_of_users_who_are_blocking_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    expect(cache()->has('laravel-block:blocking.1'))->toBeTrue();
 
-        $user2->block($user1);
+    $user2->clearBlockingCacheFor($user1);
 
-        $blockedByIds = $user1->getBlockersIds();
+    expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
+});
 
-        $this->assertContains(2, $blockedByIds);
-    }
+it('clears the blocking cache for another user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
 
-    /** @test */
-    public function it_caches_the_ids_of_users_a_user_is_blocking()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
+    $user1->block($user2);
+    $user1->cacheBlocking();
 
-        $this->actingAs($user1);
+    expect(cache()->has('laravel-block:blocking.1'))->toBeTrue();
 
-        auth()->user()->block($user2);
-        auth()->user()->cacheBlocking();
+    $user2->clearBlockingCacheFor($user1->id);
 
-        $this->assertContains(2, cache('blocking.' . auth()->id()));
-    }
+    expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
+});
 
-    /** @test */
-    public function it_gets_the_cached_ids_of_users_a_user_is_blocking()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
-
-        $this->actingAs($user1);
-
-        auth()->user()->block($user2);
-        auth()->user()->cacheBlocking();
-
-        $this->assertContains(2, auth()->user()->getBlockingCache());
-    }
-
-    /** @test */
-    public function it_caches_the_ids_of_users_who_are_blocking_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
-
-        $user2->block($user1);
-
-        $this->actingAs($user1);
-
-        auth()->user()->cacheBlockers();
-
-        $this->assertContains(2, cache('blockers.' . auth()->id()));
-    }
-
-    /** @test */
-    public function it_gets_the_cached_ids_of_users_who_are_blocking_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
-
-        $user2->block($user1);
-
-        $this->actingAs($user1);
-
-        auth()->user()->cacheBlockers();
-
-        $this->assertContains(2, auth()->user()->getBlockersCache());
-    }
-
-    /** @test */
-    public function it_clears_the_cached_ids_of_users_who_are_blocked_by_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
-
-        $user2->block($user1);
-
-        $this->actingAs($user1);
-
-        auth()->user()->cacheBlocking();
-
-        auth()->user()->clearBlockingCache();
-
-        $cache = auth()->user()->getBlockingCache();
-
-        if (empty($cache)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
-
-    /** @test */
-    public function it_clears_the_cached_ids_of_users_who_are_blocking_a_user()
-    {
-        $user1 = User::create();
-        $user2 = User::create();
-
-        $user2->block($user1);
-
-        $this->actingAs($user1);
-
-        auth()->user()->cacheBlockers();
-
-        auth()->user()->clearBlockersCache();
-
-        $cache = auth()->user()->getBlockersCache();
-
-        if (empty($cache)) {
-            $this->assertTrue(true);
-        } else {
-            $this->fail();
-        }
-    }
-}
