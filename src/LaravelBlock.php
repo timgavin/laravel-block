@@ -159,7 +159,7 @@ trait LaravelBlock
     /**
      * Check if there is any block relationship between this user and another user.
      */
-    public function hasBlockWith(int|Authenticatable $user): bool
+    public function hasAnyBlockWith(int|Authenticatable $user): bool
     {
         $user_id = is_int($user) ? $user : ($user->id ?? null);
 
@@ -269,6 +269,91 @@ trait LaravelBlock
             'blocking' => $this->getBlockingIds(),
             'blockers' => $this->getBlockersIds(),
         ];
+    }
+
+    /**
+     * Returns all user IDs involved in any block relationship with this user.
+     * Combines both blocking and blocked-by in a single query.
+     */
+    public function getAllBlockUserIds(): array
+    {
+        return Block::toBase()
+            ->where('user_id', $this->id)
+            ->orWhere('blocking_id', $this->id)
+            ->get(['user_id', 'blocking_id'])
+            ->flatMap(fn ($row) => [$row->user_id, $row->blocking_id])
+            ->reject(fn ($id) => $id === $this->id)
+            ->unique()
+            ->values()
+            ->toArray();
+    }
+
+    /**
+     * Scope to exclude users involved in any block relationship with the given user.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  int|Authenticatable|null  $user  The user to check blocks for (defaults to auth user)
+     */
+    public function scopeExcludeBlocked($query, int|Authenticatable|null $user = null): void
+    {
+        $userId = match (true) {
+            is_int($user) => $user,
+            $user instanceof Authenticatable => $user->id,
+            default => auth()->id(),
+        };
+
+        if ($userId === null) {
+            return;
+        }
+
+        $blockedIds = Block::toBase()
+            ->where('user_id', $userId)
+            ->orWhere('blocking_id', $userId)
+            ->get(['user_id', 'blocking_id'])
+            ->flatMap(fn ($row) => [$row->user_id, $row->blocking_id])
+            ->reject(fn ($id) => $id === $userId)
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (! empty($blockedIds)) {
+            $query->whereNotIn($query->getModel()->getTable().'.id', $blockedIds);
+        }
+    }
+
+    /**
+     * Get block status for multiple users in batch.
+     * Returns array keyed by user ID with is_blocking and is_blocked_by flags.
+     *
+     * @param  array<int>  $userIds
+     * @return array<int, array{is_blocking: bool, is_blocked_by: bool}>
+     */
+    public function getBlockStatusForUsers(array $userIds): array
+    {
+        if (empty($userIds)) {
+            return [];
+        }
+
+        $blocking = Block::toBase()
+            ->where('user_id', $this->id)
+            ->whereIn('blocking_id', $userIds)
+            ->pluck('blocking_id')
+            ->flip()
+            ->toArray();
+
+        $blockedBy = Block::toBase()
+            ->whereIn('user_id', $userIds)
+            ->where('blocking_id', $this->id)
+            ->pluck('user_id')
+            ->flip()
+            ->toArray();
+
+        return collect($userIds)->mapWithKeys(fn ($id) => [
+            $id => [
+                'is_blocking' => isset($blocking[$id]),
+                'is_blocked_by' => isset($blockedBy[$id]),
+            ],
+        ])->toArray();
     }
 
     /**

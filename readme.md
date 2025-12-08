@@ -108,7 +108,7 @@ auth()->user()->toggleBlock($user);
 ### Check if there is any block relationship between two users
 
 ```php
-@if (auth()->user()->hasBlockWith($user))
+@if (auth()->user()->hasAnyBlockWith($user))
     There is a block relationship.
 @endif
 ```
@@ -172,6 +172,39 @@ auth()->user()->getBlockersIds();
 
 ```php
 auth()->user()->getBlockingAndBlockersIds();
+```
+
+### Get all user IDs involved in any block relationship (single query)
+
+Useful for feed exclusion - returns IDs of users you're blocking AND users blocking you.
+
+```php
+auth()->user()->getAllBlockUserIds();
+```
+
+### Get block status for multiple users in batch
+
+Returns status for multiple users in just 2 queries instead of 2N. Useful for API responses.
+
+```php
+$userIds = $users->pluck('id')->toArray();
+$statuses = auth()->user()->getBlockStatusForUsers($userIds);
+
+// Returns: [userId => ['is_blocking' => bool, 'is_blocked_by' => bool]]
+```
+
+## Query Scopes
+
+### Exclude blocked users from queries
+
+Excludes users involved in any block relationship with the given user.
+
+```php
+// Exclude users blocked by or blocking the authenticated user
+User::query()->excludeBlocked()->get();
+
+// Exclude users blocked by or blocking a specific user
+User::query()->excludeBlocked($user)->get();
 ```
 
 ## Relationships

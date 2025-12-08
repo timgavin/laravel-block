@@ -276,9 +276,9 @@ it('checks if users have any block relationship', function () {
 
     $user1->block($user2);
 
-    expect($user1->hasBlockWith($user2))->toBeTrue();
-    expect($user2->hasBlockWith($user1))->toBeTrue();
-    expect($user1->hasBlockWith($user3))->toBeFalse();
+    expect($user1->hasAnyBlockWith($user2))->toBeTrue();
+    expect($user2->hasAnyBlockWith($user1))->toBeTrue();
+    expect($user1->hasAnyBlockWith($user3))->toBeFalse();
 });
 
 it('gets block relationships between two users', function () {
@@ -602,4 +602,96 @@ it('clears the blocking cache for another user by id', function () {
     $user2->clearBlockingCacheFor($user1->id);
 
     expect(cache()->has('laravel-block:blocking.1'))->toBeFalse();
+});
+
+// New v2.1 tests - Batch query methods
+
+it('gets all block user ids in single query', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+    $user4 = User::create();
+
+    $user1->block($user2); // user1 blocks user2
+    $user3->block($user1); // user3 blocks user1
+
+    $ids = $user1->getAllBlockUserIds();
+
+    expect($ids)->toContain($user2->id)
+        ->toContain($user3->id)
+        ->not->toContain($user1->id)
+        ->not->toContain($user4->id);
+});
+
+it('returns empty array when no block relationships exist', function () {
+    $user1 = User::create();
+
+    expect($user1->getAllBlockUserIds())->toBe([]);
+});
+
+it('excludes blocked users with scope', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user1->block($user2);
+
+    $results = User::query()->excludeBlocked($user1)->pluck('id')->toArray();
+
+    expect($results)->toContain($user1->id)
+        ->toContain($user3->id)
+        ->not->toContain($user2->id);
+});
+
+it('excludes users blocking this user with scope', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+
+    $user2->block($user1); // user2 blocks user1
+
+    $results = User::query()->excludeBlocked($user1)->pluck('id')->toArray();
+
+    expect($results)->toContain($user1->id)
+        ->toContain($user3->id)
+        ->not->toContain($user2->id);
+});
+
+it('scope does nothing when user is null', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $results = User::query()->excludeBlocked(null)->pluck('id')->toArray();
+
+    expect($results)->toContain($user1->id)
+        ->toContain($user2->id);
+});
+
+it('gets block status for multiple users in batch', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+    $user3 = User::create();
+    $user4 = User::create();
+
+    $user1->block($user2);
+    $user3->block($user1);
+
+    $statuses = $user1->getBlockStatusForUsers([$user2->id, $user3->id, $user4->id]);
+
+    expect($statuses[$user2->id])->toBe(['is_blocking' => true, 'is_blocked_by' => false]);
+    expect($statuses[$user3->id])->toBe(['is_blocking' => false, 'is_blocked_by' => true]);
+    expect($statuses[$user4->id])->toBe(['is_blocking' => false, 'is_blocked_by' => false]);
+});
+
+it('returns empty array for empty user ids array', function () {
+    $user1 = User::create();
+
+    expect($user1->getBlockStatusForUsers([]))->toBe([]);
+});
+
+it('has any block with returns false when no relationship', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    expect($user1->hasAnyBlockWith($user2))->toBeFalse();
 });
