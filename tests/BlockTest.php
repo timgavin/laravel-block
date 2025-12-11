@@ -695,3 +695,36 @@ it('has any block with returns false when no relationship', function () {
 
     expect($user1->hasAnyBlockWith($user2))->toBeFalse();
 });
+
+it('gets block status for a single user', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    // No relationship
+    $status = $user1->getBlockStatusFor($user2);
+    expect($status['is_blocking'])->toBeFalse();
+    expect($status['is_blocked_by'])->toBeFalse();
+
+    // User1 blocks User2
+    $user1->block($user2);
+    $status = $user1->getBlockStatusFor($user2);
+    expect($status['is_blocking'])->toBeTrue();
+    expect($status['is_blocked_by'])->toBeFalse();
+
+    // Mutual block
+    $user2->block($user1);
+    $status = $user1->getBlockStatusFor($user2);
+    expect($status['is_blocking'])->toBeTrue();
+    expect($status['is_blocked_by'])->toBeTrue();
+});
+
+it('gets block status for a single user by id', function () {
+    $user1 = User::create();
+    $user2 = User::create();
+
+    $user1->block($user2);
+
+    $status = $user1->getBlockStatusFor($user2->id);
+    expect($status['is_blocking'])->toBeTrue();
+    expect($status['is_blocked_by'])->toBeFalse();
+});

@@ -193,6 +193,16 @@ $statuses = auth()->user()->getBlockStatusForUsers($userIds);
 // Returns: [userId => ['is_blocking' => bool, 'is_blocked_by' => bool]]
 ```
 
+### Get block status for a single user
+
+Returns bidirectional block status in a single query. Useful for profile pages.
+
+```php
+$status = auth()->user()->getBlockStatusFor($user);
+
+// Returns: ['is_blocking' => bool, 'is_blocked_by' => bool]
+```
+
 ## Query Scopes
 
 ### Exclude blocked users from queries

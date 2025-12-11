@@ -357,6 +357,49 @@ trait LaravelBlock
     }
 
     /**
+     * Get block status for a single user in one query.
+     *
+     * @return array{is_blocking: bool, is_blocked_by: bool}
+     */
+    public function getBlockStatusFor(int|Authenticatable $user): array
+    {
+        $user_id = is_int($user) ? $user : ($user->id ?? null);
+
+        if ($user_id === null) {
+            return [
+                'is_blocking' => false,
+                'is_blocked_by' => false,
+            ];
+        }
+
+        $results = Block::toBase()
+            ->where(function ($query) use ($user_id) {
+                $query->where('user_id', $this->id)->where('blocking_id', $user_id);
+            })
+            ->orWhere(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id)->where('blocking_id', $this->id);
+            })
+            ->get(['user_id', 'blocking_id']);
+
+        $isBlocking = false;
+        $isBlockedBy = false;
+
+        foreach ($results as $row) {
+            if ($row->user_id == $this->id && $row->blocking_id == $user_id) {
+                $isBlocking = true;
+            }
+            if ($row->user_id == $user_id && $row->blocking_id == $this->id) {
+                $isBlockedBy = true;
+            }
+        }
+
+        return [
+            'is_blocking' => $isBlocking,
+            'is_blocked_by' => $isBlockedBy,
+        ];
+    }
+
+    /**
      * Caches IDs of the users a user is blocking.
      */
     public function cacheBlocking(mixed $duration = null): void
